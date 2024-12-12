@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration Form</title>
+</head>
+<body>
+    <h1>Student Registration</h1>
+    <form id="studentForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+      <label for="regNo">regNo:</label>
+        <input type="number" id="regNo" name="regNo" required><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="branch">Branch:</label>
+        <input type="text" id="Branch" name="Branch" required><br><br>
+
+        <button type="submit">SUBMIT</button>
+    </form>
+    <script>
+        const API_URL = 'http://localhost:3000/api/students';
+
+        // Fetch and display students
+        async function fetchStudents() {
+            const response = await fetch(API_URL);
+            const students = await response.json();
+            const studentsList = document.getElementById('studentsList');
+            studentsList.innerHTML = '';
+            students.forEach(student => {
+                const li = document.createElement('li');
+                li.textContent = `${student.name} - ${student.email} - ${student.course}`;
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = () => deleteStudent(student._id);
+                li.appendChild(deleteBtn);
+                studentsList.appendChild(li);
+            });
+        }
+
+        // Register new student
+        document.getElementById('studentForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const regNo = document.getElementById('regNo').value;
+            const email = document.getElementById('email').value;
+            const Branch = document.getElementById('Branch').value;
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, course }),
+            });
+
+            document.getElementById('studentForm').reset();
+            fetchStudents();
+        });
+
+        // Delete student
+        async function deleteStudent(id) {
+            await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE',
+            });
+            fetchStudents();
+        }
+
+        fetchStudents();
+    </script>
+</body>
+</html>
